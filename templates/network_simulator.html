@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Simulador de Errores de Red</h1>
+    <p class="text-center">Simula diferentes tipos de errores en tu red para entender su comportamiento y cómo afectan su rendimiento.</p>
+    <hr>
+
+    <!-- Formulario para seleccionar el tipo de error -->
+    <div class="card shadow p-4">
+        <h3 class="text-center">Selecciona el tipo de error</h3>
+        <form id="simulationForm">
+            <div class="form-group">
+                <label for="errorType">Tipo de error:</label>
+                <select class="form-control" id="errorType" required>
+                    <option value="" disabled selected>Selecciona un error</option>
+                    <option value="high_latency">Alta Latencia</option>
+                    <option value="low_speed">Velocidad Baja</option>
+                    <option value="packet_loss">Pérdida de Paquetes</option>
+                </select>
+            </div>
+            <div class="text-center">
+                <button id="analyze-btn" class="btn btn-danger text-white">Simular Error</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Resultados de la simulación -->
+    <div class="mt-5">
+        <h3 class="text-center">Resultados de la Simulación</h3>
+        <div id="simulationResults" class="alert alert-info" style="display: none;">
+            <p>Cargando resultados...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("simulationForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const errorType = document.getElementById("errorType").value;
+        const resultsDiv = document.getElementById("simulationResults");
+        resultsDiv.style.display = "block";
+        resultsDiv.classList.remove("alert-danger", "alert-info", "alert-success");
+        resultsDiv.classList.add("alert-info");
+        resultsDiv.innerHTML = "<p>Cargando resultados...</p>";
+
+        fetch("/api/simulate_network_error", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ error_type: errorType })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                resultsDiv.classList.remove("alert-info");
+                resultsDiv.classList.add("alert-danger");
+                resultsDiv.innerHTML = `<p><strong>Error:</strong> ${data.error}</p>`;
+            } else {
+                resultsDiv.classList.remove("alert-info");
+                resultsDiv.classList.add("alert-success");
+
+                resultsDiv.innerHTML = `
+                    <h4>Resultados:</h4>
+                    <ul>
+                        <li><strong>Velocidad de Descarga:</strong> ${data.download_speed} Mbps (${data.download_description})</li>
+                        <li><strong>Velocidad de Subida:</strong> ${data.upload_speed} Mbps (${data.upload_description})</li>
+                        <li><strong>Latencia en Reposo:</strong> ${data.idle_latency} ms (${data.latency_description})</li>
+                        <li><strong>Ubicación:</strong> ${data.location}</li>
+                        <li><strong>ISP:</strong> ${data.isp}</li>
+                        <li><strong>Conexiones Activas:</strong> ${data.active_connections} (${data.connections_description})</li>
+                        <li><strong>Estado:</strong> ${data.status}</li>
+                    </ul>
+                    <p><strong>Timestamp:</strong> ${data.timestamp}</p>
+                `;
+            }
+        })
+        .catch(error => {
+            resultsDiv.classList.remove("alert-info");
+            resultsDiv.classList.add("alert-danger");
+            resultsDiv.innerHTML = `<p><strong>Error:</strong> ${error.message}</p>`;
+        });
+    });
+</script>
+{% endblock %}

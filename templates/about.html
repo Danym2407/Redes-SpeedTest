@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Sobre Nosotros - Nibble{% endblock %}
+
+{% block content %}
+    <!-- Header con imagen y título -->
+    <header class="header-about">
+        <div class="header-overlay">
+            <div class="contenedor-ibero">
+                <h2>Sobre Nosotros</h2>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sección principal -->
+    <section class="ibero">
+        <div class="contenedor-ibero">
+            <h2>Bienvenido a Nibble</h2>
+        </div>
+    </section>
+
+    <section>
+        <div class="contenedor-sombre">
+            <div class="blog-entry">
+                <h3 class="center">Sobre Nosotros</h3>
+                <p>En Nibble, la tecnología es nuestra pasión. Somos una empresa dedicada a ofrecer soluciones innovadoras en servicios de redes...</p>
+            </div>
+
+            <!-- Nuestro equipo -->
+            <h3 class="text-center">Nuestro equipo</h3>
+            <section>
+                <div class="container mt-5">
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            <img src="{{ url_for('static', filename='img/c4.jpeg') }}" alt="Creador 1" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px;">
+                            <p><strong>Iris Jasso</strong></p>
+                            <p>Fundadora y Directora General...</p>
+                        </div>
+
+                        <div class="col-md-3 text-center">
+                            <img src="{{ url_for('static', filename='img/c3.jpeg') }}" alt="Creador 2" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px;">
+                            <p><strong>Jesús Tlacomulco</strong></p>
+                            <p>Director Técnico...</p>
+                        </div>
+
+                        <div class="col-md-3 text-center">
+                            <img src="{{ url_for('static', filename='img/c2.jpeg') }}" alt="Creador 3" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px;">
+                            <p><strong>Natalia López</strong></p>
+                            <p>Gerente de Atención al Cliente...</p>
+                        </div>
+
+                        <div class="col-md-3 text-center">
+                            <img src="{{ url_for('static', filename='img/c1.jpeg') }}" alt="Creador 4" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px;">
+                            <p><strong>Daniela Méndez</strong></p>
+                            <p>Encargada de Innovación...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Más secciones sobre Historia, Misión, Valores, etc. -->
+            <div class="blog-entry">
+                <h3>Nuestra Historia</h3>
+                <p>Desde nuestros primeros pasos, en Nibble hemos estado motivados por el deseo de transformar...</p>
+            </div>
+
+            <div class="blog-entry">
+                <h3>Nuestra Misión</h3>
+                <p>Nuestra misión es mejorar la conectividad de nuestros clientes...</p>
+            </div>
+
+            <div class="bottom text-center mt-4">
+                <a href="http://localhost/ejemplo/contacto.php">
+                    <button type="button" class="btn btn-danger">Contáctanos</button>
+                </a>
+            </div>
+        </div>
+    </section>
+{% endblock %}

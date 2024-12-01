@@ -1,0 +1,209 @@
+/* Burbuja del chatbot */
+.chat-bubble {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #dc3545;
+    color: white;
+    font-size: 20px;
+    font-family: 'Poppins', sans-serif; /* Fuente moderna */
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra suave */
+    transition: transform 0.2s ease;
+}
+
+.chat-bubble:hover {
+    transform: scale(1.1); /* Efecto de zoom al pasar el mouse */
+}
+
+/* Contenedor del chatbot */
+#chat-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 320px;
+    height: 420px;
+    background-color: rgba(255, 255, 255, 0.354);
+    color: black;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Sombra más intensa */
+    z-index: 10;
+    overflow: hidden;
+}
+
+#chat-container.hidden {
+    display: none;
+}
+
+/* Estilos para el header del chat */
+#chat-header {
+    display: flex;
+    justify-content: center; /* Centrar el título */
+    align-items: center;
+    padding: 10px;
+    background-color: #dc3545; /* Rojo llamativo */
+    color: white; /* Texto blanco */
+    font-weight: bold;
+    font-size: 18px; /* Tamaño de fuente */
+    font-family: 'Poppins', sans-serif;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+/* Estilo del botón de cerrar (opcional si tienes un ícono) */
+#chat-header button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#chat-header button:hover {
+    color: #f8d7da; /* Color más claro al pasar el mouse */
+}
+
+/* Cuerpo del chat */
+#chat-body {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto; /* Scroll para mensajes largos */
+    background-color: #f8f9fa87; /* Fondo gris claro */
+    color: black;
+    font-size: 14px;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Mensajes */
+.message {
+    max-width: 60%; /* Mensajes más amplios */
+    min-width: 30%;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 20px;
+    word-wrap: break-word;
+    font-size: 14px;
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.5; /* Mejor espacio entre líneas */
+}
+
+/* Mensajes enviados (a la derecha) */
+.message.sent {
+    background-color: #dc3545;
+    color: white;
+    align-self: flex-end;
+    margin-left: auto;
+    margin-right: 10px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Sombra para profundidad */
+}
+
+/* Mensajes recibidos (a la izquierda) */
+.message.received {
+    background-color: #e9ecef;
+    color: black;
+    align-self: flex-start;
+    margin-right: auto;
+    margin-left: 10px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Animación de "escribiendo" */
+.typing-indicator {
+    font-size: 14px;
+    color: #888;
+    margin-top: 10px;
+}
+
+/* Estilo del cuadro de texto y botón */
+.input-area {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+/* Input y botón en la parte inferior */
+#chat-input {
+    display: flex;
+    align-items: center; /* Centra verticalmente */
+    justify-content: space-between; /* Distribuye espacio horizontal */
+    padding: 10px;
+    background-color: #343a40; /* Fondo oscuro */
+    border-top: 1px solid #495057;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+#message-box {
+    flex: 1;
+    max-width: 75%; /* Ajusta el ancho máximo */
+    padding: 10px;
+    margin-right: 10px;
+    border: none; /* Sin borde */
+    border-radius: 20px;
+    outline: none;
+    background-color: #495057; /* Fondo oscuro */
+    color: white;
+    font-size: 14px;
+    font-family: 'Roboto', sans-serif;
+    transition: background-color 0.3s ease;
+}
+
+#message-box:focus {
+    background-color: #6c757d; /* Cambio de color al enfocarse */
+}
+
+#chat-input button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 20px;
+    background-color: #dc3545;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#chat-input button:hover {
+    background-color: #c82333;
+    transform: scale(1.05); /* Efecto de zoom */
+}
+
+/* Estilos para el mapa */
+#map-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Coloca el mapa detrás del contenido */
+}
+
+
+#analyze-btn {
+    background-color: red;
+    color: white;
+    border: none;
+}
+
+#analyze-btn:hover {
+    background-color: darkred;
+}
+
+
+

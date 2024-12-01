@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Análisis de Ancho de Banda{% endblock %}
+
+{% block content %}
+    <h1 style="text-align: center; color: #333;">Consumo de Ancho de Banda por Dispositivo</h1>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border: 2px solid #333;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+        th {
+            background-color: #d32f2f;  /* Rojo */
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;  /* Gris claro */
+        }
+        tr:nth-child(odd) {
+            background-color: #fff;  /* Blanco */
+        }
+        tr:hover {
+            background-color: #ffebee;  /* Rojo muy suave */
+        }
+        td {
+            color: #333;  /* Texto oscuro */
+        }
+        h1 {
+            font-family: 'Arial', sans-serif;
+            font-size: 2em;
+            color: #333;
+        }
+    </style>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Dispositivo/Interfaz</th>
+                <th>Bytes Enviados (MB)</th>
+                <th>Bytes Recibidos (MB)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for interface, stats in bandwidth_data %}
+            <tr>
+                <td>{{ interface }}</td>
+                <td>{{ stats['bytes_sent'] }}</td>
+                <td>{{ stats['bytes_recv'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

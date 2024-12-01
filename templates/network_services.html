@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}
+Servicios Activos en la Red
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Dispositivos y Servicios en la Red</h2>
+    
+    {% if error %}
+        <div class="error">
+            <p>Error al escanear la red: {{ error }}</p>
+        </div>
+    {% elif devices %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>IP</th>
+                    <th>Hostname</th>
+                    <th>Estado</th>
+                    <th>Servicios Activos</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for device in devices %}
+                <tr>
+                    <td>{{ device.ip }}</td>
+                    <td>{{ device.hostname }}</td>
+                    <td>{{ device.state }}</td>
+                    <td>
+                        <ul>
+                            {% for service in device.services %}
+                            <li>Puerto: {{ service.port }} ({{ service.service }}) - {{ service.state }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No se encontraron dispositivos en la red especificada.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+<!-- analisis.html -->
+{% extends "base.html" %}
+
+{% block content %}
+    <h1 class="text-center">Análisis de Red</h1>
+
+    <!-- Aquí van los gráficos o la información específica para la página de análisis -->
+    <div id="download_speed_graph">
+        {{ download_speed_graph | safe }}
+    </div>
+
+    <div id="latency_graph">
+        {{ latency_graph | safe }}
+    </div>
+    
+    <h2 class="text-center">Resumen</h2>
+    <p>Datos sobre la velocidad de descarga, latencia y conexiones activas...</p>
+{% endblock %}

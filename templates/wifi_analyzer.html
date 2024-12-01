@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Análisis de Red</h1>
+    <p class="text-center">Monitorea y analiza el rendimiento de tu red en tiempo real.</p>
+
+    <!-- Sección para mostrar los resultados -->
+    <div id="network-results" class="mt-4">
+        <!-- Primera fila -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Velocidad de Descarga</h5>
+                        <p id="download-speed" class="card-text">Cargando...</p>
+                        <small id="download-description" class="text-muted">Cargando descripción...</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Velocidad de Subida</h5>
+                        <p id="upload-speed" class="card-text">Cargando...</p>
+                        <small id="upload-description" class="text-muted">Cargando descripción...</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Estado</h5>
+                        <p id="status" class="card-text">Cargando...</p>
+                        <small class="text-muted">El estado indica si tu red es estable o inestable.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Segunda fila -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Latencia en Reposo</h5>
+                        <p id="latency_idle" class="card-text">Cargando...</p>
+                        <small id="latency-description" class="text-muted">Cargando descripción...</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Latencia de Descarga</h5>
+                        <p id="download-latency" class="card-text">Cargando...</p>
+                        <small class="text-muted">Tiempo que tarda un paquete en ser recibido desde internet.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Latencia de Subida</h5>
+                        <p id="upload-latency" class="card-text">Cargando...</p>
+                        <small class="text-muted">Tiempo que tarda un paquete en ser enviado a internet.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tercera fila: Conexiones Activas -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Conexiones Activas</h5>
+                        <div id="active-connections">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <strong>Establecidas:</strong> <span id="established-count">Cargando...</span>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>En escucha:</strong> <span id="listen-count">Cargando...</span>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>En espera (TIME_WAIT):</strong> <span id="time-wait-count">Cargando...</span>
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Total:</strong> <span id="total-connections">Cargando...</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <small id="connections-description" class="text-muted">Número de conexiones activas clasificadas por estado.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Ubicación</h5>
+                        <p id="location" class="card-text">Cargando...</p>
+                        <small class="text-muted">Muestra la ubicación aproximada de la conexión.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cuarta fila -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Proveedor de Internet</h5>
+                        <p id="isp" class="card-text">Cargando...</p>
+                        <small class="text-muted">Identifica el proveedor del servicio de internet.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Última Actualización</h5>
+                        <p id="timestamp" class="card-text">Cargando...</p>
+                        <small class="text-muted">Muestra la fecha y hora del último análisis.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón para actualizar los datos -->
+    <div class="text-center mt-4">
+        <button id="analyze-btn" class="btn btn-danger text-white">Actualizar Análisis</button>
+    </div>
+</div>
+
+<script>
+// Función para obtener los datos de análisis de red
+async function fetchNetworkData() {
+    const fields = [
+        'download-speed', 'upload-speed', 'latency_idle',
+        'download-latency', 'upload-latency', 'location',
+        'isp', 'timestamp', 'status'
+    ];
+
+    // Inicializar valores en "Cargando..."
+    fields.forEach(field => {
+        document.getElementById(field).innerText = 'Cargando...';
+    });
+
+    try {
+        const response = await fetch('/api/network_data');
+        const data = await response.json();
+
+        // Actualizar métricas generales
+        document.getElementById('download-speed').innerText = data.download_speed 
+            ? `${data.download_speed} Mbps` 
+            : 'No disponible';
+        document.getElementById('upload-speed').innerText = data.upload_speed 
+            ? `${data.upload_speed} Mbps` 
+            : 'No disponible';
+        document.getElementById('latency_idle').innerText = data.idle_latency 
+            ? `${data.idle_latency} ms` 
+            : 'No disponible';
+        document.getElementById('timestamp').innerText = data.timestamp 
+            ? data.timestamp 
+            : 'No disponible';
+        document.getElementById('status').innerText = data.status 
+            ? data.status 
+            : 'No disponible';
+        document.getElementById('location').innerText = data.location 
+            ? data.location 
+            : 'No disponible';
+        document.getElementById('download-latency').innerText = data.download_latency 
+            ? `${data.download_latency} ms` 
+            : 'No disponible';
+        document.getElementById('upload-latency').innerText = data.upload_latency 
+            ? `${data.upload_latency} ms` 
+            : 'No disponible';
+        document.getElementById('isp').innerText = data.isp 
+            ? data.isp 
+            : 'No disponible';
+
+        // Actualizar Conexiones Activas
+        document.getElementById('established-count').innerText = data.active_connections?.established_count ?? 'No disponible';
+        document.getElementById('listen-count').innerText = data.active_connections?.listen_count ?? 'No disponible';
+        document.getElementById('time-wait-count').innerText = data.active_connections?.time_wait_count ?? 'No disponible';
+        document.getElementById('total-connections').innerText = data.active_connections?.total ?? 'No disponible';
+
+    } catch (error) {
+        alert('Error al obtener los datos de la red. Por favor, inténtalo nuevamente.');
+    }
+}
+
+// Asignar evento al botón para actualizar
+document.getElementById('analyze-btn').addEventListener('click', fetchNetworkData);
+
+// Cargar datos al iniciar
+fetchNetworkData();
+</script>
+{% endblock %}

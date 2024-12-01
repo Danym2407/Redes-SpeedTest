@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid d-flex flex-column align-items-center justify-content-center min-vh-100">
+    <!-- Contenedor del mapa 3D -->
+    <div class="row w-100">
+        <div id="model-container" class="col-12 col-md-8 col-lg-6" style="height: 100vh;">
+        </div>
+    </div>
+
+    <!-- Contenedor de progreso -->
+    <div id="progress-container" class="d-flex justify-content-center align-items-center">
+        <div id="progress" class="text-center text-dark">Cargando el mapa...</div>
+    </div>
+
+    <div id="tooltip" style="position: absolute; display: none; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 5px; border-radius: 5px;"></div>
+
+    <!-- Burbuja del chatbot -->
+    <div class="chat-bubble" onclick="toggleChat()">
+        💬
+    </div>
+
+    <!-- Contenedor del chatbot -->
+    <div id="chat-container" class="hidden">
+        <div id="chat-header" class="d-flex justify-content-between align-items-center p-3 bg-success text-white">
+            Nibble
+            <button class="close-chat" onclick="toggleChat()">×</button>
+        </div>
+        <div id="chat-body" class="chat-body">
+            <!-- Mensajes se agregarán dinámicamente -->
+        </div>
+        <div id="chat-input" class="d-flex p-3 border-top">
+            <input type="text" id="message-box" class="form-control mr-2" placeholder="Escribe un mensaje...">
+            <button class="btn btn-success" onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Agregar el archivo JS de Three.js -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+
+<!-- Agregar el archivo JS del proyecto -->
+<script src="{{ url_for('static', filename='js/ibero2.js') }}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configuración del renderizador
+        const renderer = new THREE.WebGLRenderer({ alpha: true });
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000, 0);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = false;
+
+        document.getElementById('model-container').appendChild(renderer.domElement);
+
+        // Configuración de la escena y la cámara
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+        camera.position.set(0, 100, 80);
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.enablePan = false;
+        controls.maxDistance = 100;
+        controls.minDistance = 30;
+        controls.enableZoom = true;
+        controls.zoomSpeed = 1.2;
+        controls.autoRotate = false;
+        controls.target = new THREE.Vector3(0, 0, 0);
+        controls.update();
+
+        // Luz ambiental y direccional
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+        directionalLight.position.set(10, 100, 0);
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
+
+        // LOD (Level of Detail)
+        const lod = new THREE.LOD();
+        const loader = new THREE.GLTFLoader().setPath('/static/img/');
+
+        // Configuración de texturas
+        const textureLoader = new THREE.TextureLoader();
+        const originalTexture = textureLoader.load('/static/Textures/BRICKTEXTURE.png');
+        const greenTexture = textureLoader.load('/static/Textures/V_BRICKTEXTURE.png');
+
+        // Cargar el archivo GLB corrupto y eliminar los 12 bytes
+        function loadCorruptedGLB() {
+            fetch('/static/img/13iberomapa_corrupted.glb')
+                .then(response => {
+                    if (!response.ok) {
+                        console.error('Archivo GLB no encontrado o error en la carga');
+                        throw new Error('Archivo no encontrado o error en la carga');
+                    }
+                    return response.arrayBuffer();
+                })
+                .then(buffer => {
+                    const fixedBuffer = buffer.slice(12); // Elimina los primeros 12 bytes corruptos
+
+                    loader.parse(fixedBuffer, '', (gltf) => {
+                        const modelMesh = gltf.scene;
+                        modelMesh.traverse((child) => {
+                            if (child.isMesh) {
+                                child.castShadow = true;
+                                child.receiveShadow = true;
+
+                                // Asignar textura original
+                                child.material.map = originalTexture;
+                                child.material.needsUpdate = true;
+                            }
+                        });
+
+                        modelMesh.position.set(0, 0, 0);
+                        scene.add(modelMesh);
+
+                        // Inicia la animación
+                        animate();
+
+                    }, undefined, (error) => {
+                        console.error('Error al cargar el modelo:', error);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al cargar el archivo GLB:', error);
+                });
+        }
+
+        loadCorruptedGLB();
+
+        // Ajustar tamaño del renderizador al redimensionar la ventana
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
+
+        // Animación
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            lod.update(camera);
+            renderer.render(scene, camera);
+        }
+
+        // Variables para manejar el estado de selección
+        const tooltip = document.getElementById('tooltip'); // Referencia al tooltip
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        renderer.domElement.addEventListener('mousemove', onMouseMove, false);
+
+        function onMouseMove(event) {
+            // Ajusta las coordenadas del mouse relativas al canvas
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            // Crea un rayo desde la cámara hacia el mouse
+            raycaster.setFromCamera(mouse, camera);
+
+            // Detecta intersecciones con objetos
+            const intersects = raycaster.intersectObjects(scene.children);
+
+            // Restablece textura original a todos los objetos
+            scene.traverse((child) => {
+                if (child.isMesh) {
+                    child.material.map = originalTexture;
+                    child.material.needsUpdate = true;
+                }
+            });
+
+            // Muestra el tooltip si el mouse está sobre un objeto
+            if (intersects.length > 0) {
+                const hoveredObject = intersects[0].object;
+
+                if (hoveredObject.isMesh) {
+                    hoveredObject.material.map = greenTexture;
+                    hoveredObject.material.needsUpdate = true;
+
+                    // Muestra información en el tooltip
+                    tooltip.style.display = 'block';
+                    fetch(`https://tu-servidor.com/api/obtener_datos.php?name=${encodeURIComponent(hoveredObject.name)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.error) {
+                            tooltip.innerText = `
+                                Nombre: ${data.nombre}
+                                Velocidad Descarga: ${data.download_speed} Mbps
+                                Velocidad Subida: ${data.upload_speed} Mbps
+                                Latencia: ${data.idle_latency} ms
+                                Conexiones Activas: ${data.active_connections}
+                            `;
+                        } else {
+                            tooltip.innerText = "Información no disponible";
+                        }
+                        tooltip.style.display = 'block';
+                    })
+                    .catch(() => {
+                        tooltip.innerText = "Error al obtener información";
+                        tooltip.style.display = 'block';
+                    });
+                    tooltip.style.left = `${event.clientX + 10}px`;
+                    tooltip.style.top = `${event.clientY + 10}px`;
+                    
+                }
+            } else {
+                // Oculta el tooltip si no hay intersecciones
+                tooltip.style.display = 'none';
+            }
+        }
+
+        // Asegúrate de ocultar el tooltip si el mouse sale del canvas
+        renderer.domElement.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
+    });
+</script>
+{% endblock %}
